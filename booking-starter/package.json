@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api:generate": "tsp compile docs/call_booking_api.tsp --emit @typespec/openapi3",
+    "api:mock": "prism mock tsp-output/@typespec/openapi3/openapi.yaml --port 4010"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
