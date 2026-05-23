@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
+import { CalendarDays } from "lucide-react"
 
 import { cn } from "@/shared/lib/utils"
 
@@ -17,9 +18,10 @@ export function AppHeader() {
     )
 
   return (
-    <header className="border-b bg-background">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <Link to="/" className="text-lg font-semibold tracking-tight">
+    <header className="border-b border-border bg-card">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+        <Link to="/" className="flex items-center gap-2 text-base font-bold tracking-tight">
+          <CalendarDays className="h-5 w-5 text-primary" />
           Calendar
         </Link>
         <nav className="flex items-center gap-4">
