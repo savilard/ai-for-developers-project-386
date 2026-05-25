@@ -390,6 +390,8 @@ namespace Public {
    *
    * Используется на странице выбора вида брони.
    */
+  @opExample(#{ returnType: #{ eventTypes: #[#{ id: "15-min", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 }, #{ id: "30-min", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 }] }, options: #{ title: "success" }})
+  @opExample(#{ returnType: #{ eventTypes: #[] }, options: #{ title: "empty" }})
   @get
   @route("/event-types")
   op listEventTypes(): EventTypeListResponse;
