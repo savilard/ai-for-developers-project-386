@@ -100,8 +100,7 @@ export function EventTypesPage() {
     async function load() {
       try {
         setStatus("loading")
-        const response = await listPublicEventTypes()
-        const types = response.eventTypes
+        const types = await listPublicEventTypes()
 
         if (types.length === 0) {
           setStatus("empty")

@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "api:generate": "tsp compile docs/call_booking_api.tsp --emit @typespec/openapi3",
-    "api:mock": "prism mock tsp-output/@typespec/openapi3/openapi.yaml --port 4010"
+    "api:examples": "node scripts/add-prism-examples.mjs",
+    "api:generate:examples": "npm run api:generate && npm run api:examples",
+    "api:mock": "npm run api:generate:examples && prism mock tsp-output/@typespec/openapi3/openapi.yaml --port 4010",
+    "api:mock:clean": "npm run api:generate && prism mock tsp-output/@typespec/openapi3/openapi.yaml --port 4010"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -43,6 +46,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "js-yaml": "^4.1.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"
