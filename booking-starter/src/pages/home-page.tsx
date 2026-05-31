@@ -17,6 +17,7 @@ import { Badge } from "@/shared/ui/badge"
 function AvatarSvg() {
   return (
     <svg
+      aria-hidden="true"
       className="h-10 w-10 shrink-0"
       viewBox="0 0 48 48"
       fill="none"
@@ -87,18 +88,18 @@ function BookingPreviewCard() {
           <div className="mb-4 flex items-center justify-between">
             <h4 className="text-base font-semibold text-card-foreground">Июнь 2026</h4>
             <div className="flex gap-1">
-              <button
-                aria-label="Предыдущий месяц"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-secondary"
+              <span
+                aria-hidden="true"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted-foreground"
               >
                 <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                aria-label="Следующий месяц"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-secondary"
+              </span>
+              <span
+                aria-hidden="true"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted-foreground"
               >
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </span>
             </div>
           </div>
 
@@ -135,7 +136,7 @@ function BookingPreviewCard() {
               } else if (slot.status === "busy") {
                 classes += " bg-muted text-muted-foreground opacity-60 border-border"
               } else {
-                classes += " border-border text-card-foreground hover:bg-accent/30"
+                classes += " border-border text-card-foreground"
               }
               return (
                 <div key={slot.time} className={classes}>

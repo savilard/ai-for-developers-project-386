@@ -112,10 +112,7 @@ export function BookingSlotsPage() {
 
   // Load event type
   useEffect(() => {
-    if (!safeEventTypeId) {
-      setEventTypeStatus("error")
-      return
-    }
+    if (!safeEventTypeId) return
 
     async function load() {
       try {
@@ -145,12 +142,19 @@ export function BookingSlotsPage() {
         const data = await listAvailableSlots(safeEventTypeId)
         if (data.length === 0) {
           setSlots([])
+          setSelectedDate(null)
+          setSelectedSlot(null)
           setSlotsStatus("empty")
         } else {
           setSlots(data)
+          setSelectedDate(getUniqueDatesFromSlots(data)[0] ?? null)
+          setSelectedSlot(null)
           setSlotsStatus("success")
         }
       } catch {
+        setSlots([])
+        setSelectedDate(null)
+        setSelectedSlot(null)
         setSlotsStatus("error")
       }
     }
@@ -158,13 +162,9 @@ export function BookingSlotsPage() {
     load()
   }, [safeEventTypeId, eventTypeStatus])
 
-  // Set default selectedDate when availableDays change
-  useEffect(() => {
-    if (availableDays.length > 0 && (!selectedDate || !availableDays.some((d) => isSameDate(d, selectedDate)))) {
-      setSelectedDate(availableDays[0])
-      setSelectedSlot(null)
-    }
-  }, [availableDays])
+  const effectiveEventTypeStatus: EventTypeStatus = safeEventTypeId
+    ? eventTypeStatus
+    : "error"
 
   function handleSelectDate(date: Date) {
     setSelectedDate(date)
@@ -186,7 +186,7 @@ export function BookingSlotsPage() {
     return `/book/${eventTypeId}/confirm?${params.toString()}`
   }, [eventTypeId, selectedDate, selectedSlot])
 
-  if (eventTypeStatus === "loading") {
+  if (effectiveEventTypeStatus === "loading") {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-2/5" />
@@ -199,7 +199,7 @@ export function BookingSlotsPage() {
     )
   }
 
-  if (eventTypeStatus === "not-found") {
+  if (effectiveEventTypeStatus === "not-found") {
     return (
       <div className="space-y-6">
         <Alert variant="destructive">
@@ -215,7 +215,7 @@ export function BookingSlotsPage() {
     )
   }
 
-  if (eventTypeStatus === "error") {
+  if (effectiveEventTypeStatus === "error") {
     return (
       <div className="space-y-6">
         <Alert variant="destructive">

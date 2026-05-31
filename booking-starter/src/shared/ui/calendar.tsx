@@ -11,7 +11,8 @@ import {
 } from "react-day-picker"
 
 import { cn } from "@/shared/lib/utils"
-import { Button, buttonVariants } from "@/shared/ui/button"
+import { Button } from "@/shared/ui/button"
+import { buttonVariants } from "@/shared/ui/button-variants"
 
 function Calendar({
   className,
