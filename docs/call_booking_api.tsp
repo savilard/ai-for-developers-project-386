@@ -156,6 +156,16 @@ enum BookingStatus {
    * Бронирование подтверждено.
    */
   confirmed: "confirmed",
+
+  /**
+   * Бронирование ожидает подтверждения владельцем календаря.
+   */
+  pending: "pending",
+
+  /**
+   * Бронирование отменено.
+   */
+  cancelled: "cancelled",
 }
 
 /**
@@ -334,6 +344,81 @@ model ConflictErrorResponse {
 }
 
 /**
+ * Сводная статистика бронирований за выбранный период.
+ */
+model BookingSummary {
+  /**
+   * Общее количество бронирований за выбранный период без учета фильтра status.
+   */
+  @minValue(0)
+  total: int32;
+
+  /**
+   * Количество подтвержденных бронирований за выбранный период.
+   */
+  @minValue(0)
+  confirmed: int32;
+
+  /**
+   * Количество бронирований, ожидающих подтверждения, за выбранный период.
+   */
+  @minValue(0)
+  pending: int32;
+
+  /**
+   * Количество отмененных бронирований за выбранный период.
+   */
+  @minValue(0)
+  cancelled: int32;
+}
+
+/**
+ * Метаданные серверной пагинации.
+ */
+model PaginationMeta {
+  /**
+   * Текущая страница, начиная с 1.
+   */
+  @minValue(1)
+  page: int32;
+
+  /**
+   * Количество элементов на странице.
+   */
+  @minValue(1)
+  pageSize: int32;
+
+  /**
+   * Общее количество элементов после применения фильтров периода и status.
+   */
+  @minValue(0)
+  totalItems: int32;
+
+  /**
+   * Общее количество страниц после применения фильтров периода и status.
+   */
+  @minValue(0)
+  totalPages: int32;
+}
+
+/**
+ * Тело ответа админского списка бронирований.
+ */
+model AdminBookingListBody {
+  bookings: Booking[];
+  summary: BookingSummary;
+  pagination: PaginationMeta;
+}
+
+/**
+ * Ответ админского списка бронирований.
+ */
+model AdminBookingListResponse {
+  @statusCode statusCode: 200;
+  @body body: AdminBookingListBody;
+}
+
+/**
  * Админский API владельца календаря.
  *
  * В MVP нет авторизации.
@@ -374,7 +459,37 @@ namespace Admin {
    */
   @get
   @route("/bookings/upcoming")
-  op listUpcomingBookings(): BookingListResponse;
+  op listUpcomingBookings(
+    /**
+     * Начало периода фильтрации.
+     */
+    @query from?: utcDateTime,
+
+    /**
+     * Конец периода фильтрации.
+     */
+    @query to?: utcDateTime,
+
+    /**
+     * Статус бронирования для фильтрации таблицы.
+     */
+    @query status?: BookingStatus,
+
+    /**
+     * Номер страницы, начиная с 1.
+     */
+    @query
+    @minValue(1)
+    page?: int32,
+
+    /**
+     * Количество элементов на странице.
+     */
+    @query
+    @minValue(1)
+    @maxValue(100)
+    pageSize?: int32,
+  ): AdminBookingListResponse | ValidationErrorResponse;
 }
 
 /**
@@ -390,8 +505,8 @@ namespace Public {
    *
    * Используется на странице выбора вида брони.
    */
-  @opExample(#{ returnType: #{ eventTypes: #[#{ id: "15-min", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 }, #{ id: "30-min", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 }] }, options: #{ title: "success" }})
-  @opExample(#{ returnType: #{ eventTypes: #[] }, options: #{ title: "empty" }})
+  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[#{ id: "15-min", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 }, #{ id: "30-min", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 }] } }, #{ title: "success" })
+  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[] } }, #{ title: "empty" })
   @get
   @route("/event-types")
   op listEventTypes(): EventTypeListResponse;

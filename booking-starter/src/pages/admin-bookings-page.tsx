@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -10,11 +11,26 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import type { Booking, BookingStatus, GuestContact } from "@/shared/api/types";
+import { listUpcomingBookings } from "@/shared/api";
+import type {
+  AdminBookingListResponse,
+  Booking,
+  BookingStatus,
+  BookingSummary,
+  GuestContact,
+  PaginationMeta,
+} from "@/shared/api/types";
 import { cn } from "@/shared/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
+import { Calendar } from "@/shared/ui/calendar";
 import { Card, CardContent } from "@/shared/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui/popover";
 import {
   Select,
   SelectContent,
@@ -23,6 +39,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { Separator } from "@/shared/ui/separator";
+import { Skeleton } from "@/shared/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -36,9 +53,21 @@ import {
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */
 
-type AdminBookingStatus = BookingStatus | "pending" | "cancelled";
-type StatusFilter = "all" | AdminBookingStatus;
-type AdminBooking = Omit<Booking, "status"> & { status: AdminBookingStatus };
+type StatusFilter = "all" | BookingStatus;
+
+const EMPTY_SUMMARY: BookingSummary = {
+  total: 0,
+  confirmed: 0,
+  pending: 0,
+  cancelled: 0,
+};
+
+const EMPTY_PAGINATION: PaginationMeta = {
+  page: 1,
+  pageSize: 8,
+  totalItems: 0,
+  totalPages: 1,
+};
 
 /* ------------------------------------------------------------------ */
 /*  Date helpers                                                      */
@@ -61,8 +90,10 @@ function getEndOfWeek(date: Date): Date {
   return end;
 }
 
-function isDateInRange(date: Date, start: Date, end: Date): boolean {
-  return date >= start && date <= end;
+function addWeeks(date: Date, weeks: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + weeks * 7);
+  return result;
 }
 
 function isSameLocalDate(a: Date, b: Date): boolean {
@@ -143,297 +174,6 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function sortBookingsByStartAt(bookings: AdminBooking[]): AdminBooking[] {
-  return [...bookings].sort(
-    (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Mock data                                                         */
-/* ------------------------------------------------------------------ */
-
-function mockIso(dayOffset: number, hour: number, minute: number): string {
-  const d = getStartOfWeek(new Date());
-  d.setDate(d.getDate() + dayOffset);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
-
-function makeMockBooking({
-  id,
-  day,
-  start,
-  end,
-  title,
-  name,
-  email,
-  status,
-}: {
-  id: string;
-  day: number;
-  start: [number, number];
-  end: [number, number];
-  title: string;
-  name: string;
-  email: string;
-  status: AdminBookingStatus;
-}): AdminBooking {
-  return {
-    id,
-    eventTypeId: title.toLowerCase().replaceAll(" ", "-"),
-    eventTypeTitle: title,
-    guest: { name, email },
-    startAt: mockIso(day, start[0], start[1]),
-    endAt: mockIso(day, end[0], end[1]),
-    status,
-    createdAt: mockIso(Math.max(day - 2, 0), 8, 30),
-  };
-}
-
-const MOCK_BOOKINGS: AdminBooking[] = [
-  makeMockBooking({
-    id: "b1",
-    day: 0,
-    start: [9, 0],
-    end: [9, 15],
-    title: "Знакомство",
-    name: "Алексей К.",
-    email: "alexey@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b2",
-    day: 0,
-    start: [10, 30],
-    end: [11, 0],
-    title: "Консультация",
-    name: "Мария С.",
-    email: "maria@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b3",
-    day: 0,
-    start: [14, 0],
-    end: [14, 15],
-    title: "Разбор проекта",
-    name: "Дмитрий П.",
-    email: "dmitry@example.com",
-    status: "pending",
-  }),
-  makeMockBooking({
-    id: "b4",
-    day: 1,
-    start: [9, 0],
-    end: [9, 30],
-    title: "Звонок",
-    name: "Екатерина И.",
-    email: "kate@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b5",
-    day: 1,
-    start: [11, 0],
-    end: [12, 0],
-    title: "Демо",
-    name: "Сергей В.",
-    email: "sergey@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b6",
-    day: 2,
-    start: [15, 30],
-    end: [15, 45],
-    title: "Знакомство",
-    name: "Анна Н.",
-    email: "anna@example.com",
-    status: "cancelled",
-  }),
-  makeMockBooking({
-    id: "b7",
-    day: 3,
-    start: [10, 0],
-    end: [10, 30],
-    title: "Консультация",
-    name: "Иван П.",
-    email: "ivan@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b8",
-    day: 3,
-    start: [16, 0],
-    end: [16, 15],
-    title: "Разбор проекта",
-    name: "Ольга Л.",
-    email: "olga@example.com",
-    status: "pending",
-  }),
-  makeMockBooking({
-    id: "b9",
-    day: 4,
-    start: [9, 0],
-    end: [9, 30],
-    title: "Звонок",
-    name: "Никита Р.",
-    email: "nikita@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b10",
-    day: 4,
-    start: [11, 30],
-    end: [12, 0],
-    title: "Демо",
-    name: "Виктория М.",
-    email: "victoria@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b11",
-    day: 4,
-    start: [13, 0],
-    end: [13, 15],
-    title: "Знакомство",
-    name: "Павел А.",
-    email: "pavel@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b12",
-    day: 4,
-    start: [15, 0],
-    end: [16, 0],
-    title: "Консультация",
-    name: "Дарья Б.",
-    email: "daria@example.com",
-    status: "cancelled",
-  }),
-  makeMockBooking({
-    id: "b13",
-    day: 5,
-    start: [9, 30],
-    end: [9, 45],
-    title: "Разбор проекта",
-    name: "Михаил Г.",
-    email: "mikhail@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b14",
-    day: 5,
-    start: [10, 30],
-    end: [11, 0],
-    title: "Звонок",
-    name: "Ксения Д.",
-    email: "ksenia@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b15",
-    day: 5,
-    start: [12, 0],
-    end: [12, 30],
-    title: "Демо",
-    name: "Артём Е.",
-    email: "artem@example.com",
-    status: "pending",
-  }),
-  makeMockBooking({
-    id: "b16",
-    day: 5,
-    start: [14, 0],
-    end: [15, 0],
-    title: "Знакомство",
-    name: "Полина Ж.",
-    email: "polina@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b17",
-    day: 5,
-    start: [16, 30],
-    end: [17, 0],
-    title: "Консультация",
-    name: "Роман З.",
-    email: "roman@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b18",
-    day: 6,
-    start: [9, 0],
-    end: [9, 15],
-    title: "Разбор проекта",
-    name: "Лилия К.",
-    email: "lilia@example.com",
-    status: "cancelled",
-  }),
-  makeMockBooking({
-    id: "b19",
-    day: 6,
-    start: [10, 0],
-    end: [10, 30],
-    title: "Звонок",
-    name: "Георгий Л.",
-    email: "georgy@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b20",
-    day: 6,
-    start: [11, 0],
-    end: [12, 0],
-    title: "Демо",
-    name: "Юлия М.",
-    email: "yulia@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b21",
-    day: 6,
-    start: [13, 0],
-    end: [13, 30],
-    title: "Знакомство",
-    name: "Денис Н.",
-    email: "denis@example.com",
-    status: "pending",
-  }),
-  makeMockBooking({
-    id: "b22",
-    day: 6,
-    start: [14, 0],
-    end: [14, 30],
-    title: "Консультация",
-    name: "Алина О.",
-    email: "alina@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b23",
-    day: 6,
-    start: [15, 0],
-    end: [15, 15],
-    title: "Разбор проекта",
-    name: "Борис П.",
-    email: "boris@example.com",
-    status: "confirmed",
-  }),
-  makeMockBooking({
-    id: "b24",
-    day: 6,
-    start: [16, 0],
-    end: [16, 30],
-    title: "Звонок",
-    name: "Татьяна Р.",
-    email: "tatyana@example.com",
-    status: "cancelled",
-  }),
-];
-
 /* ------------------------------------------------------------------ */
 /*  UI pieces                                                         */
 /* ------------------------------------------------------------------ */
@@ -472,28 +212,137 @@ function AdminBookingsFilteredEmpty() {
   );
 }
 
+function AdminBookingsLoading() {
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Card
+            key={index}
+            className="rounded-xl border-border bg-card shadow-sm"
+          >
+            <CardContent className="flex items-center gap-5 p-6">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-10" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="overflow-hidden rounded-xl border border-[#e8edf4] bg-card shadow-sm">
+        <div className="space-y-0">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div
+              key={index}
+              className="grid h-[72px] grid-cols-[250px_280px_310px_210px] items-center gap-0 border-b border-[#eef2f7] px-5"
+            >
+              <Skeleton className="h-4 w-44" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-6 w-28 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AdminBookingsError({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <Alert variant="destructive" className="border-destructive/30">
+      <AlertTitle>Не удалось загрузить встречи</AlertTitle>
+      <AlertDescription>
+        <p>{message}</p>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Повторить
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 function FiltersBar({
   weekRange,
+  periodStart,
+  onSelectPeriodDate,
+  onPreviousWeek,
+  onNextWeek,
   statusFilter,
   onStatusFilterChange,
 }: {
   weekRange: string;
+  periodStart: Date;
+  onSelectPeriodDate: (date: Date) => void;
+  onPreviousWeek: () => void;
+  onNextWeek: () => void;
   statusFilter: StatusFilter;
   onStatusFilterChange: (value: string) => void;
 }) {
+  const [periodOpen, setPeriodOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="inline-flex h-10 items-center gap-3 rounded-md border border-input bg-card px-4 text-sm font-medium text-foreground shadow-sm">
-          <CalendarDays
-            className="h-4 w-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <span>{weekRange}</span>
-          <ChevronRight
-            className="h-4 w-4 rotate-90 text-muted-foreground"
-            aria-hidden="true"
-          />
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            onClick={onPreviousWeek}
+            aria-label="Предыдущая неделя"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <Popover open={periodOpen} onOpenChange={setPeriodOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 min-w-[274px] justify-start bg-card px-4 text-sm font-medium text-foreground shadow-sm"
+              >
+                <CalendarDays
+                  className="h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <span>{weekRange}</span>
+                <ChevronDown
+                  className="ml-auto h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={periodStart}
+                defaultMonth={periodStart}
+                onSelect={(date) => {
+                  if (date) {
+                    onSelectPeriodDate(date);
+                    setPeriodOpen(false);
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            onClick={onNextWeek}
+            aria-label="Следующая неделя"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </Button>
         </div>
         <Select value={statusFilter} onValueChange={onStatusFilterChange}>
           <SelectTrigger className="h-10 w-full bg-card shadow-sm sm:w-[184px]">
@@ -554,7 +403,7 @@ function StatsCard({
   );
 }
 
-function StatusBadge({ status }: { status: AdminBookingStatus }) {
+function StatusBadge({ status }: { status: BookingStatus }) {
   if (status === "confirmed") {
     return (
       <Badge className="border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-50">
@@ -619,7 +468,7 @@ function DateTimeCell({
   );
 }
 
-function EventCell({ booking }: { booking: AdminBooking }) {
+function EventCell({ booking }: { booking: Booking }) {
   const duration = getDurationMinutes(booking.startAt, booking.endAt);
   return (
     <div className="space-y-0.5">
@@ -631,7 +480,7 @@ function EventCell({ booking }: { booking: AdminBooking }) {
   );
 }
 
-function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
+function BookingsTable({ bookings }: { bookings: Booking[] }) {
   return (
     <Table className="min-w-[900px] table-fixed">
       <TableHeader>
@@ -652,7 +501,10 @@ function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
       </TableHeader>
       <TableBody>
         {bookings.map((booking) => (
-          <TableRow key={booking.id} className="h-[72px] border-[#eef2f7] hover:bg-muted/20">
+          <TableRow
+            key={booking.id}
+            className="h-[72px] border-[#eef2f7] hover:bg-muted/20"
+          >
             <TableCell className="px-5 py-3">
               <DateTimeCell startAt={booking.startAt} endAt={booking.endAt} />
             </TableCell>
@@ -672,7 +524,7 @@ function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
   );
 }
 
-function BookingMobileCard({ booking }: { booking: AdminBooking }) {
+function BookingMobileCard({ booking }: { booking: Booking }) {
   const date = new Date(booking.startAt);
   const duration = getDurationMinutes(booking.startAt, booking.endAt);
   return (
@@ -799,59 +651,108 @@ function PaginationControls({
 /* ------------------------------------------------------------------ */
 
 export function AdminBookingsPage() {
-  const [bookings] = useState<AdminBooking[]>(MOCK_BOOKINGS);
+  const [periodStart, setPeriodStart] = useState(() =>
+    getStartOfWeek(new Date())
+  );
+  const [periodEnd, setPeriodEnd] = useState(() => getEndOfWeek(new Date()));
+  const [data, setData] = useState<AdminBookingListResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
 
-  const weekStart = useMemo(() => getStartOfWeek(new Date()), []);
-  const weekEnd = useMemo(() => getEndOfWeek(new Date()), []);
+  useEffect(() => {
+    let ignore = false;
 
-  const weekBookings = useMemo(() => {
-    return sortBookingsByStartAt(
-      bookings.filter((b) => {
-        const date = new Date(b.startAt);
-        return isDateInRange(date, weekStart, weekEnd);
-      })
-    );
-  }, [bookings, weekStart, weekEnd]);
+    async function loadBookings() {
+      setIsLoading(true);
+      setErrorMessage(null);
 
-  const filteredBookings = useMemo(() => {
-    let result = weekBookings;
-    if (statusFilter !== "all") {
-      result = result.filter((b) => b.status === statusFilter);
+      try {
+        const response = await listUpcomingBookings({
+          from: periodStart.toISOString(),
+          to: periodEnd.toISOString(),
+          ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+          page,
+          pageSize,
+        });
+
+        if (!ignore) {
+          setData(response);
+          if (
+            response.pagination.totalPages > 0 &&
+            page > response.pagination.totalPages
+          ) {
+            setPage(response.pagination.totalPages);
+          }
+        }
+      } catch (error) {
+        if (!ignore) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Проверьте соединение с API и попробуйте еще раз."
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
     }
-    return result;
-  }, [weekBookings, statusFilter]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredBookings.length / pageSize)
-  );
-  const safePage = Math.min(page, totalPages);
-  const startIndex = (safePage - 1) * pageSize;
-  const visibleBookings = filteredBookings.slice(
-    startIndex,
-    startIndex + pageSize
-  );
+    void loadBookings();
 
-  const weekCount = weekBookings.length;
-  const confirmedCount = weekBookings.filter(
-    (b) => b.status === "confirmed"
-  ).length;
-  const pendingCount = weekBookings.filter((b) => b.status === "pending").length;
-  const cancelledCount = weekBookings.filter(
-    (b) => b.status === "cancelled"
-  ).length;
+    return () => {
+      ignore = true;
+    };
+  }, [page, pageSize, periodEnd, periodStart, reloadKey, statusFilter]);
+
+  const bookings = data?.bookings ?? [];
+  const summary = data?.summary ?? EMPTY_SUMMARY;
+  const pagination = data?.pagination ?? {
+    ...EMPTY_PAGINATION,
+    page,
+    pageSize,
+  };
+  const hasNoBookings = !isLoading && !errorMessage && summary.total === 0;
+  const hasNoFilteredBookings =
+    !isLoading && !errorMessage && summary.total > 0 && bookings.length === 0;
 
   function handleStatusFilterChange(value: string) {
     setStatusFilter(value as StatusFilter);
     setPage(1);
   }
 
+  function handleSelectPeriodDate(date: Date) {
+    setPeriodStart(getStartOfWeek(date));
+    setPeriodEnd(getEndOfWeek(date));
+    setPage(1);
+  }
+
+  function handlePreviousWeek() {
+    const previousWeek = addWeeks(periodStart, -1);
+    setPeriodStart(getStartOfWeek(previousWeek));
+    setPeriodEnd(getEndOfWeek(previousWeek));
+    setPage(1);
+  }
+
+  function handleNextWeek() {
+    const nextWeek = addWeeks(periodStart, 1);
+    setPeriodStart(getStartOfWeek(nextWeek));
+    setPeriodEnd(getEndOfWeek(nextWeek));
+    setPage(1);
+  }
+
   function handlePageSizeChange(size: number) {
     setPageSize(size);
     setPage(1);
+  }
+
+  function handleRetry() {
+    setReloadKey((key) => key + 1);
   }
 
   return (
@@ -866,71 +767,83 @@ export function AdminBookingsPage() {
       </div>
 
       <FiltersBar
-        weekRange={formatDateRange(weekStart, weekEnd)}
+        weekRange={formatDateRange(periodStart, periodEnd)}
+        periodStart={periodStart}
+        onSelectPeriodDate={handleSelectPeriodDate}
+        onPreviousWeek={handlePreviousWeek}
+        onNextWeek={handleNextWeek}
         statusFilter={statusFilter}
         onStatusFilterChange={handleStatusFilterChange}
       />
 
-      {bookings.length === 0 ? (
+      {isLoading ? (
+        <AdminBookingsLoading />
+      ) : errorMessage ? (
+        <AdminBookingsError message={errorMessage} onRetry={handleRetry} />
+      ) : hasNoBookings ? (
         <AdminBookingsEmpty />
-      ) : filteredBookings.length === 0 ? (
-        <AdminBookingsFilteredEmpty />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <StatsCard
               label="Встреч на этой неделе"
-              value={weekCount}
+              value={summary.total}
               icon={CalendarDays}
               tone="blue"
             />
             <StatsCard
               label="Подтверждено"
-              value={confirmedCount}
+              value={summary.confirmed}
               icon={Check}
               tone="green"
             />
             <StatsCard
               label="Ожидают"
-              value={pendingCount}
+              value={summary.pending}
               icon={Clock3}
               tone="orange"
             />
             <StatsCard
               label="Отменено"
-              value={cancelledCount}
+              value={summary.cancelled}
               icon={X}
               tone="slate"
             />
           </div>
 
-          <div className="hidden lg:block">
-            <div className="overflow-hidden rounded-xl border border-[#e8edf4] bg-card shadow-sm">
-              <BookingsTable bookings={visibleBookings} />
-              <PaginationControls
-                page={safePage}
-                pageSize={pageSize}
-                totalPages={totalPages}
-                totalItems={filteredBookings.length}
-                onPageChange={setPage}
-                onPageSizeChange={handlePageSizeChange}
-              />
-            </div>
-          </div>
+          {hasNoFilteredBookings ? (
+            <AdminBookingsFilteredEmpty />
+          ) : (
+            <>
+              <div className="hidden lg:block">
+                <div className="overflow-hidden rounded-xl border border-[#e8edf4] bg-card shadow-sm">
+                  <BookingsTable bookings={bookings} />
+                  <PaginationControls
+                    page={page}
+                    pageSize={pagination.pageSize}
+                    totalPages={pagination.totalPages}
+                    totalItems={pagination.totalItems}
+                    onPageChange={setPage}
+                    onPageSizeChange={handlePageSizeChange}
+                  />
+                </div>
+              </div>
 
-          <div className="lg:hidden space-y-4">
-            {visibleBookings.map((booking) => (
-              <BookingMobileCard key={booking.id} booking={booking} />
-            ))}
-            <PaginationControls
-              page={safePage}
-              pageSize={pageSize}
-              totalPages={totalPages}
-              totalItems={filteredBookings.length}
-              onPageChange={setPage}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </div>
+              <div className="lg:hidden space-y-4">
+                {bookings.map((booking) => (
+                  <BookingMobileCard key={booking.id} booking={booking} />
+                ))}
+                <PaginationControls
+                  page={page}
+                  pageSize={pagination.pageSize}
+                  totalPages={pagination.totalPages}
+                  totalItems={pagination.totalItems}
+                  onPageChange={setPage}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

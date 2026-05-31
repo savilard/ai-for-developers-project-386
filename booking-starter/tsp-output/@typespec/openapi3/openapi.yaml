@@ -13,16 +13,211 @@ paths:
         Возвращает список предстоящих бронирований по всем типам событий.
 
         Ожидаемая сортировка: по startAt по возрастанию.
-      parameters: []
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Начало периода фильтрации.
+          schema:
+            type: string
+            format: date-time
+          explode: false
+        - name: to
+          in: query
+          required: false
+          description: Конец периода фильтрации.
+          schema:
+            type: string
+            format: date-time
+          explode: false
+        - name: status
+          in: query
+          required: false
+          description: Статус бронирования для фильтрации таблицы.
+          schema:
+            $ref: "#/components/schemas/BookingStatus"
+          explode: false
+        - name: page
+          in: query
+          required: false
+          description: Номер страницы, начиная с 1.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          description: Количество элементов на странице.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+          explode: false
       responses:
         "200":
-          description: The request has succeeded.
+          description: Ответ админского списка бронирований.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Booking"
+                $ref: "#/components/schemas/AdminBookingListBody"
+              examples:
+                page1:
+                  summary: Предстоящие бронирования (страница 1)
+                  value:
+                    bookings:
+                      - id: booking-1
+                        eventTypeId: intro
+                        eventTypeTitle: Знакомство
+                        guest:
+                          name: Алексей К.
+                          email: alexey@example.com
+                        startAt: "2026-03-31T09:00:00.000Z"
+                        endAt: "2026-03-31T09:15:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-2
+                        eventTypeId: consult
+                        eventTypeTitle: Консультация
+                        guest:
+                          name: Мария С.
+                          email: maria@example.com
+                        startAt: "2026-03-31T10:30:00.000Z"
+                        endAt: "2026-03-31T11:00:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-3
+                        eventTypeId: review
+                        eventTypeTitle: Разбор проекта
+                        guest:
+                          name: Дмитрий П.
+                          email: dmitry@example.com
+                        startAt: "2026-03-31T14:00:00.000Z"
+                        endAt: "2026-03-31T14:15:00.000Z"
+                        status: pending
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-4
+                        eventTypeId: call
+                        eventTypeTitle: Звонок
+                        guest:
+                          name: Екатерина И.
+                          email: kate@example.com
+                        startAt: "2026-04-01T09:00:00.000Z"
+                        endAt: "2026-04-01T09:30:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-5
+                        eventTypeId: demo
+                        eventTypeTitle: Демо
+                        guest:
+                          name: Сергей В.
+                          email: sergey@example.com
+                        startAt: "2026-04-01T11:00:00.000Z"
+                        endAt: "2026-04-01T12:00:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-6
+                        eventTypeId: intro
+                        eventTypeTitle: Знакомство
+                        guest:
+                          name: Анна Н.
+                          email: anna@example.com
+                        startAt: "2026-04-02T15:30:00.000Z"
+                        endAt: "2026-04-02T15:45:00.000Z"
+                        status: cancelled
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-7
+                        eventTypeId: consult
+                        eventTypeTitle: Консультация
+                        guest:
+                          name: Иван П.
+                          email: ivan@example.com
+                        startAt: "2026-04-03T10:00:00.000Z"
+                        endAt: "2026-04-03T10:30:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-8
+                        eventTypeId: review
+                        eventTypeTitle: Разбор проекта
+                        guest:
+                          name: Ольга Л.
+                          email: olga@example.com
+                        startAt: "2026-04-03T16:00:00.000Z"
+                        endAt: "2026-04-03T16:15:00.000Z"
+                        status: pending
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                    summary:
+                      total: 12
+                      confirmed: 8
+                      pending: 2
+                      cancelled: 2
+                    pagination:
+                      page: 1
+                      pageSize: 8
+                      totalItems: 12
+                      totalPages: 2
+                page2:
+                  summary: Предстоящие бронирования (страница 2)
+                  value:
+                    bookings:
+                      - id: booking-9
+                        eventTypeId: call
+                        eventTypeTitle: Звонок
+                        guest:
+                          name: Никита Р.
+                          email: nikita@example.com
+                        startAt: "2026-04-04T09:00:00.000Z"
+                        endAt: "2026-04-04T09:30:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-10
+                        eventTypeId: demo
+                        eventTypeTitle: Демо
+                        guest:
+                          name: Виктория М.
+                          email: victoria@example.com
+                        startAt: "2026-04-04T11:30:00.000Z"
+                        endAt: "2026-04-04T12:00:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-11
+                        eventTypeId: intro
+                        eventTypeTitle: Знакомство
+                        guest:
+                          name: Павел А.
+                          email: pavel@example.com
+                        startAt: "2026-04-04T13:00:00.000Z"
+                        endAt: "2026-04-04T13:15:00.000Z"
+                        status: confirmed
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                      - id: booking-12
+                        eventTypeId: consult
+                        eventTypeTitle: Консультация
+                        guest:
+                          name: Дарья Б.
+                          email: daria@example.com
+                        startAt: "2026-04-04T15:00:00.000Z"
+                        endAt: "2026-04-04T16:00:00.000Z"
+                        status: cancelled
+                        createdAt: "2026-03-30T10:00:00.000Z"
+                    summary:
+                      total: 12
+                      confirmed: 8
+                      pending: 2
+                      cancelled: 2
+                    pagination:
+                      page: 2
+                      pageSize: 8
+                      totalItems: 12
+                      totalPages: 2
+        "400":
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
       tags:
         - Владелец
   /admin/event-types:
@@ -153,8 +348,11 @@ paths:
                 items:
                   $ref: "#/components/schemas/EventType"
               examples:
+                empty:
+                  summary: empty
+                  value: []
                 success:
-                  summary: Два типа событий
+                  summary: success
                   value:
                     - id: 15-min
                       title: Встреча 15 минут
@@ -164,9 +362,6 @@ paths:
                       title: Встреча 30 минут
                       description: Базовый тип события для бронирования.
                       durationMinutes: 30
-                empty:
-                  summary: Пустой список
-                  value: []
       tags:
         - Гость
   /public/event-types/{eventTypeId}:
@@ -696,6 +891,22 @@ paths:
         - Гость
 components:
   schemas:
+    AdminBookingListBody:
+      type: object
+      required:
+        - bookings
+        - summary
+        - pagination
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
+        summary:
+          $ref: "#/components/schemas/BookingSummary"
+        pagination:
+          $ref: "#/components/schemas/PaginationMeta"
+      description: Тело ответа админского списка бронирований.
     ApiError:
       type: object
       required:
@@ -764,11 +975,51 @@ components:
         Бронирование времени гостем.
 
         Создаётся без регистрации и авторизации.
+    BookingListResponse:
+      type: object
+      required:
+        - bookings
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
     BookingStatus:
       type: string
       enum:
         - confirmed
+        - pending
+        - cancelled
       description: Статус бронирования.
+    BookingSummary:
+      type: object
+      required:
+        - total
+        - confirmed
+        - pending
+        - cancelled
+      properties:
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Общее количество бронирований за выбранный период без учета фильтра status.
+        confirmed:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Количество подтвержденных бронирований за выбранный период.
+        pending:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Количество бронирований, ожидающих подтверждения, за выбранный период.
+        cancelled:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Количество отмененных бронирований за выбранный период.
+      description: Сводная статистика бронирований за выбранный период.
     CreateBookingRequest:
       type: object
       required:
@@ -904,6 +1155,35 @@ components:
 
         В MVP нет регистрации и авторизации.
         Профиль владельца используется системой по умолчанию.
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Текущая страница, начиная с 1.
+        pageSize:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Количество элементов на странице.
+        totalItems:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Общее количество элементов после применения фильтров периода и status.
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Общее количество страниц после применения фильтров периода и status.
+      description: Метаданные серверной пагинации.
     Slot:
       type: object
       required:

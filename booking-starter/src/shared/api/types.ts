@@ -49,7 +49,7 @@ export interface GuestContact {
 /**
  * Статус бронирования.
  */
-export type BookingStatus = "confirmed";
+export type BookingStatus = "confirmed" | "pending" | "cancelled";
 
 /**
  * Бронирование времени гостем.
@@ -91,4 +91,44 @@ export interface ApiError {
   code: ErrorCode;
   message: string;
   details?: string[];
+}
+
+/**
+ * Сводная статистика бронирований за выбранный период.
+ */
+export interface BookingSummary {
+  total: number;
+  confirmed: number;
+  pending: number;
+  cancelled: number;
+}
+
+/**
+ * Метаданные серверной пагинации.
+ */
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+/**
+ * Ответ админского списка бронирований.
+ */
+export interface AdminBookingListResponse {
+  bookings: Booking[];
+  summary: BookingSummary;
+  pagination: PaginationMeta;
+}
+
+/**
+ * Query-параметры для админского списка бронирований.
+ */
+export interface AdminBookingListParams {
+  from?: string;
+  to?: string;
+  status?: BookingStatus;
+  page?: number;
+  pageSize?: number;
 }
