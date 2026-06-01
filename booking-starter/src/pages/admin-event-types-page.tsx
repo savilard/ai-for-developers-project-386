@@ -1,7 +1,8 @@
+import { useMemo, useState } from "react";
+
 import {
   CalendarDays,
   Check,
-  ChevronDown,
   Pencil,
   Plus,
   Search,
@@ -13,6 +14,13 @@ import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Separator } from "@/shared/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 // TODO: replace layout fixtures with GET /admin/event-types data.
 const EVENT_TYPE_FIXTURES = [
@@ -42,9 +50,23 @@ const EVENT_TYPE_FIXTURES = [
   },
 ];
 
-const TOTAL_COUNT = EVENT_TYPE_FIXTURES.length;
+type EventTypeFixture = (typeof EVENT_TYPE_FIXTURES)[number];
 
-function FiltersPanel() {
+type FiltersPanelProps = {
+  searchQuery: string;
+  durationFilter: string;
+  durationOptions: number[];
+  onSearchQueryChange: (value: string) => void;
+  onDurationFilterChange: (value: string) => void;
+};
+
+function FiltersPanel({
+  searchQuery,
+  durationFilter,
+  durationOptions,
+  onSearchQueryChange,
+  onDurationFilterChange,
+}: FiltersPanelProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -55,27 +77,39 @@ function FiltersPanel() {
               aria-hidden="true"
             />
             <Input
+              aria-label="Поиск по названию типа события"
               className="h-12 pl-11"
-              disabled
+              onChange={(event) => onSearchQueryChange(event.target.value)}
               placeholder="Поиск по названию"
               type="text"
+              value={searchQuery}
             />
           </div>
-          <button
-            className="inline-flex h-12 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:w-[260px]"
-            disabled
-            type="button"
+          <Select
+            onValueChange={onDurationFilterChange}
+            value={durationFilter}
           >
-            <span className="flex items-center gap-2">
+            <SelectTrigger
+              aria-label="Фильтр по длительности"
+              className="h-12 w-full bg-background sm:w-[260px]"
+            >
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-              Все длительности
-            </span>
-            <ChevronDown className="h-4 w-4" aria-hidden="true" />
-          </button>
+              <SelectValue placeholder="Все длительности" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все длительности</SelectItem>
+              {durationOptions.map((duration) => (
+                <SelectItem key={duration} value={String(duration)}>
+                  {duration} мин
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button
           className="h-12 w-full sm:w-auto sm:min-w-[240px]"
           disabled
+          title="Создание будет подключено вместе с API"
           type="button"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -86,7 +120,11 @@ function FiltersPanel() {
   );
 }
 
-function StatsPanel() {
+type StatsPanelProps = {
+  totalCount: number;
+};
+
+function StatsPanel({ totalCount }: StatsPanelProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -99,7 +137,7 @@ function StatsPanel() {
           </div>
           <div className="text-sm font-medium text-foreground">
             Всего типов событий:{" "}
-            <span className="font-semibold">{TOTAL_COUNT}</span>
+            <span className="font-semibold">{totalCount}</span>
           </div>
         </div>
         <Separator className="sm:hidden" orientation="horizontal" />
@@ -109,7 +147,7 @@ function StatsPanel() {
             <Check className="h-5 w-5 text-green-600" aria-hidden="true" />
           </div>
           <div className="text-sm font-medium text-foreground">
-            Активных: <span className="font-semibold">{TOTAL_COUNT}</span>
+            Активных: <span className="font-semibold">{totalCount}</span>
           </div>
         </div>
       </div>
@@ -117,11 +155,11 @@ function StatsPanel() {
   );
 }
 
-function EventTypeCard({
-  eventType,
-}: {
-  eventType: (typeof EVENT_TYPE_FIXTURES)[number];
-}) {
+type EventTypeCardProps = {
+  eventType: EventTypeFixture;
+};
+
+function EventTypeCard({ eventType }: EventTypeCardProps) {
   return (
     <Card className="rounded-xl border-border bg-card shadow-sm">
       <CardContent className="p-6">
@@ -150,6 +188,7 @@ function EventTypeCard({
           <Button
             className="w-full sm:w-[280px]"
             disabled
+            title="Недоступно: endpoint не описан в API-контракте"
             type="button"
             variant="outline"
           >
@@ -159,6 +198,7 @@ function EventTypeCard({
           <Button
             className="w-full text-red-600 hover:bg-red-50 hover:text-red-700 sm:w-auto"
             disabled
+            title="Недоступно: endpoint не описан в API-контракте"
             type="button"
             variant="ghost"
           >
@@ -170,17 +210,77 @@ function EventTypeCard({
   );
 }
 
-function EventTypesGrid() {
+type EventTypesGridProps = {
+  eventTypes: EventTypeFixture[];
+};
+
+function EventTypesGrid({ eventTypes }: EventTypesGridProps) {
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-      {EVENT_TYPE_FIXTURES.map((eventType) => (
+      {eventTypes.map((eventType) => (
         <EventTypeCard key={eventType.id} eventType={eventType} />
       ))}
     </div>
   );
 }
 
+type FilteredEmptyStateProps = {
+  onResetFilters: () => void;
+};
+
+function FilteredEmptyState({ onResetFilters }: FilteredEmptyStateProps) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+      <div className="flex flex-col items-center justify-center gap-4 text-center">
+        <h3 className="text-lg font-semibold text-foreground">
+          Ничего не найдено
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Попробуйте изменить поиск или фильтр длительности.
+        </p>
+        <Button onClick={onResetFilters} type="button" variant="outline">
+          Сбросить фильтры
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function AdminEventTypesPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [durationFilter, setDurationFilter] = useState("all");
+
+  const durationOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(EVENT_TYPE_FIXTURES.map((eventType) => eventType.durationMinutes))
+      ).sort((a, b) => a - b),
+    []
+  );
+
+  const filteredEventTypes = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return EVENT_TYPE_FIXTURES.filter((eventType) => {
+      const matchesSearch =
+        normalizedQuery.length === 0 ||
+        eventType.title.toLowerCase().includes(normalizedQuery);
+
+      const matchesDuration =
+        durationFilter === "all" ||
+        String(eventType.durationMinutes) === durationFilter;
+
+      return matchesSearch && matchesDuration;
+    });
+  }, [durationFilter, searchQuery]);
+
+  const totalCount = EVENT_TYPE_FIXTURES.length;
+
+  function resetFilters() {
+    setSearchQuery("");
+    setDurationFilter("all");
+  }
+
   return (
     <section className="space-y-6">
       <div className="space-y-2">
@@ -192,9 +292,20 @@ export function AdminEventTypesPage() {
         </p>
       </div>
 
-      <FiltersPanel />
-      <StatsPanel />
-      <EventTypesGrid />
+      <FiltersPanel
+        searchQuery={searchQuery}
+        durationFilter={durationFilter}
+        durationOptions={durationOptions}
+        onSearchQueryChange={setSearchQuery}
+        onDurationFilterChange={setDurationFilter}
+      />
+      <StatsPanel totalCount={totalCount} />
+
+      {filteredEventTypes.length > 0 ? (
+        <EventTypesGrid eventTypes={filteredEventTypes} />
+      ) : (
+        <FilteredEmptyState onResetFilters={resetFilters} />
+      )}
     </section>
   );
 }
