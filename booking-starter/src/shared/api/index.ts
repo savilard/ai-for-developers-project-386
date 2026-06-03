@@ -2,6 +2,7 @@ export { request, ApiRequestError } from "./client";
 export type {
   Owner,
   EventType,
+  EventTypeResponse,
   CreateEventTypeRequest,
   Slot,
   GuestContact,

@@ -21,7 +21,6 @@ export interface EventType {
  * Запрос на создание типа события владельцем календаря.
  */
 export interface CreateEventTypeRequest {
-  id: string;
   title: string;
   description: string;
   durationMinutes: number;
@@ -120,6 +119,13 @@ export interface AdminBookingListResponse {
   bookings: Booking[];
   summary: BookingSummary;
   pagination: PaginationMeta;
+}
+
+/**
+ * Ответ одиночного типа события.
+ */
+export interface EventTypeResponse {
+  eventType: EventType;
 }
 
 /**

@@ -235,6 +235,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EventType"
+              examples:
+                success:
+                  summary: Созданный тип события
+                  value:
+                    id: created-event-type
+                    title: Новый тип события
+                    description: Тип события, созданный через форму.
+                    durationMinutes: 30
         "400":
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -255,6 +263,13 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateEventTypeRequest"
+            examples:
+              success:
+                summary: Создание типа события
+                value:
+                  title: Встреча 30 минут
+                  description: Базовый тип события для бронирования.
+                  durationMinutes: 30
     get:
       operationId: Admin_listEventTypes
       description: Возвращает список всех типов событий, созданных владельцем календаря.
@@ -268,6 +283,29 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/EventType"
+              examples:
+                success:
+                  summary: Типы событий
+                  value:
+                    - id: meeting-15
+                      title: Встреча 15 минут
+                      description: Короткий тип события для быстрого слота.
+                      durationMinutes: 15
+                    - id: meeting-30
+                      title: Встреча 30 минут
+                      description: Базовый тип события для бронирования.
+                      durationMinutes: 30
+                    - id: consultation-60
+                      title: Консультация 60 минут
+                      description: Подробная консультация с клиентом.
+                      durationMinutes: 60
+                    - id: project-review-45
+                      title: Разбор проекта 45 минут
+                      description: Детальный разбор проекта и рекомендации.
+                      durationMinutes: 45
+                empty:
+                  summary: Пустой список
+                  value: []
       tags:
         - Владелец
   /admin/owner:
@@ -348,20 +386,28 @@ paths:
                 items:
                   $ref: "#/components/schemas/EventType"
               examples:
-                empty:
-                  summary: empty
-                  value: []
                 success:
-                  summary: success
+                  summary: Типы событий
                   value:
-                    - id: 15-min
+                    - id: meeting-15
                       title: Встреча 15 минут
                       description: Короткий тип события для быстрого слота.
                       durationMinutes: 15
-                    - id: 30-min
+                    - id: meeting-30
                       title: Встреча 30 минут
                       description: Базовый тип события для бронирования.
                       durationMinutes: 30
+                    - id: consultation-60
+                      title: Консультация 60 минут
+                      description: Подробная консультация с клиентом.
+                      durationMinutes: 60
+                    - id: project-review-45
+                      title: Разбор проекта 45 минут
+                      description: Детальный разбор проекта и рекомендации.
+                      durationMinutes: 45
+                empty:
+                  summary: Пустой список
+                  value: []
       tags:
         - Гость
   /public/event-types/{eventTypeId}:
@@ -388,7 +434,7 @@ paths:
                 default:
                   summary: Тип события 15 минут
                   value:
-                    id: 15-min
+                    id: meeting-15
                     title: Встреча 15 минут
                     description: Короткий тип события для быстрого слота.
                     durationMinutes: 15
@@ -430,451 +476,451 @@ paths:
                 success:
                   summary: Свободные слоты на 14 дней
                   value:
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T12:00:00.000Z"
                       endAt: "2026-03-31T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T12:15:00.000Z"
                       endAt: "2026-03-31T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T12:30:00.000Z"
                       endAt: "2026-03-31T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T12:45:00.000Z"
                       endAt: "2026-03-31T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T13:00:00.000Z"
                       endAt: "2026-03-31T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T13:15:00.000Z"
                       endAt: "2026-03-31T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T13:30:00.000Z"
                       endAt: "2026-03-31T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-03-31T13:45:00.000Z"
                       endAt: "2026-03-31T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T12:00:00.000Z"
                       endAt: "2026-04-01T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T12:15:00.000Z"
                       endAt: "2026-04-01T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T12:30:00.000Z"
                       endAt: "2026-04-01T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T12:45:00.000Z"
                       endAt: "2026-04-01T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T13:00:00.000Z"
                       endAt: "2026-04-01T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T13:15:00.000Z"
                       endAt: "2026-04-01T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T13:30:00.000Z"
                       endAt: "2026-04-01T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-01T13:45:00.000Z"
                       endAt: "2026-04-01T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T12:00:00.000Z"
                       endAt: "2026-04-02T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T12:15:00.000Z"
                       endAt: "2026-04-02T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T12:30:00.000Z"
                       endAt: "2026-04-02T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T12:45:00.000Z"
                       endAt: "2026-04-02T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T13:00:00.000Z"
                       endAt: "2026-04-02T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T13:15:00.000Z"
                       endAt: "2026-04-02T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T13:30:00.000Z"
                       endAt: "2026-04-02T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-02T13:45:00.000Z"
                       endAt: "2026-04-02T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T12:00:00.000Z"
                       endAt: "2026-04-03T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T12:15:00.000Z"
                       endAt: "2026-04-03T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T12:30:00.000Z"
                       endAt: "2026-04-03T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T12:45:00.000Z"
                       endAt: "2026-04-03T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T13:00:00.000Z"
                       endAt: "2026-04-03T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T13:15:00.000Z"
                       endAt: "2026-04-03T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T13:30:00.000Z"
                       endAt: "2026-04-03T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-03T13:45:00.000Z"
                       endAt: "2026-04-03T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T12:00:00.000Z"
                       endAt: "2026-04-04T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T12:15:00.000Z"
                       endAt: "2026-04-04T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T12:30:00.000Z"
                       endAt: "2026-04-04T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T12:45:00.000Z"
                       endAt: "2026-04-04T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T13:00:00.000Z"
                       endAt: "2026-04-04T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T13:15:00.000Z"
                       endAt: "2026-04-04T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T13:30:00.000Z"
                       endAt: "2026-04-04T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-04T13:45:00.000Z"
                       endAt: "2026-04-04T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T12:00:00.000Z"
                       endAt: "2026-04-05T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T12:15:00.000Z"
                       endAt: "2026-04-05T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T12:30:00.000Z"
                       endAt: "2026-04-05T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T12:45:00.000Z"
                       endAt: "2026-04-05T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T13:00:00.000Z"
                       endAt: "2026-04-05T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T13:15:00.000Z"
                       endAt: "2026-04-05T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T13:30:00.000Z"
                       endAt: "2026-04-05T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-05T13:45:00.000Z"
                       endAt: "2026-04-05T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T12:00:00.000Z"
                       endAt: "2026-04-06T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T12:15:00.000Z"
                       endAt: "2026-04-06T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T12:30:00.000Z"
                       endAt: "2026-04-06T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T12:45:00.000Z"
                       endAt: "2026-04-06T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T13:00:00.000Z"
                       endAt: "2026-04-06T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T13:15:00.000Z"
                       endAt: "2026-04-06T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T13:30:00.000Z"
                       endAt: "2026-04-06T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-06T13:45:00.000Z"
                       endAt: "2026-04-06T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T12:00:00.000Z"
                       endAt: "2026-04-07T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T12:15:00.000Z"
                       endAt: "2026-04-07T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T12:30:00.000Z"
                       endAt: "2026-04-07T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T12:45:00.000Z"
                       endAt: "2026-04-07T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T13:00:00.000Z"
                       endAt: "2026-04-07T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T13:15:00.000Z"
                       endAt: "2026-04-07T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T13:30:00.000Z"
                       endAt: "2026-04-07T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-07T13:45:00.000Z"
                       endAt: "2026-04-07T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T12:00:00.000Z"
                       endAt: "2026-04-08T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T12:15:00.000Z"
                       endAt: "2026-04-08T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T12:30:00.000Z"
                       endAt: "2026-04-08T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T12:45:00.000Z"
                       endAt: "2026-04-08T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T13:00:00.000Z"
                       endAt: "2026-04-08T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T13:15:00.000Z"
                       endAt: "2026-04-08T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T13:30:00.000Z"
                       endAt: "2026-04-08T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-08T13:45:00.000Z"
                       endAt: "2026-04-08T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T12:00:00.000Z"
                       endAt: "2026-04-09T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T12:15:00.000Z"
                       endAt: "2026-04-09T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T12:30:00.000Z"
                       endAt: "2026-04-09T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T12:45:00.000Z"
                       endAt: "2026-04-09T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T13:00:00.000Z"
                       endAt: "2026-04-09T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T13:15:00.000Z"
                       endAt: "2026-04-09T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T13:30:00.000Z"
                       endAt: "2026-04-09T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-09T13:45:00.000Z"
                       endAt: "2026-04-09T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T12:00:00.000Z"
                       endAt: "2026-04-10T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T12:15:00.000Z"
                       endAt: "2026-04-10T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T12:30:00.000Z"
                       endAt: "2026-04-10T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T12:45:00.000Z"
                       endAt: "2026-04-10T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T13:00:00.000Z"
                       endAt: "2026-04-10T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T13:15:00.000Z"
                       endAt: "2026-04-10T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T13:30:00.000Z"
                       endAt: "2026-04-10T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-10T13:45:00.000Z"
                       endAt: "2026-04-10T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T12:00:00.000Z"
                       endAt: "2026-04-11T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T12:15:00.000Z"
                       endAt: "2026-04-11T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T12:30:00.000Z"
                       endAt: "2026-04-11T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T12:45:00.000Z"
                       endAt: "2026-04-11T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T13:00:00.000Z"
                       endAt: "2026-04-11T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T13:15:00.000Z"
                       endAt: "2026-04-11T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T13:30:00.000Z"
                       endAt: "2026-04-11T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-11T13:45:00.000Z"
                       endAt: "2026-04-11T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T12:00:00.000Z"
                       endAt: "2026-04-12T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T12:15:00.000Z"
                       endAt: "2026-04-12T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T12:30:00.000Z"
                       endAt: "2026-04-12T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T12:45:00.000Z"
                       endAt: "2026-04-12T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T13:00:00.000Z"
                       endAt: "2026-04-12T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T13:15:00.000Z"
                       endAt: "2026-04-12T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T13:30:00.000Z"
                       endAt: "2026-04-12T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-12T13:45:00.000Z"
                       endAt: "2026-04-12T14:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T12:00:00.000Z"
                       endAt: "2026-04-13T12:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T12:15:00.000Z"
                       endAt: "2026-04-13T12:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T12:30:00.000Z"
                       endAt: "2026-04-13T12:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T12:45:00.000Z"
                       endAt: "2026-04-13T13:00:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T13:00:00.000Z"
                       endAt: "2026-04-13T13:15:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T13:15:00.000Z"
                       endAt: "2026-04-13T13:30:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T13:30:00.000Z"
                       endAt: "2026-04-13T13:45:00.000Z"
                       durationMinutes: 15
-                    - eventTypeId: 15-min
+                    - eventTypeId: meeting-15
                       startAt: "2026-04-13T13:45:00.000Z"
                       endAt: "2026-04-13T14:00:00.000Z"
                       durationMinutes: 15
@@ -1046,18 +1092,10 @@ components:
     CreateEventTypeRequest:
       type: object
       required:
-        - id
         - title
         - description
         - durationMinutes
       properties:
-        id:
-          type: string
-          minLength: 1
-          description: |-
-            Уникальный идентификатор типа события.
-
-            Задаётся владельцем или админской частью системы.
         title:
           type: string
           minLength: 1
@@ -1070,7 +1108,10 @@ components:
           format: int32
           minimum: 1
           description: Длительность события в минутах.
-      description: Запрос на создание типа события владельцем календаря.
+      description: |-
+        Запрос на создание типа события владельцем календаря.
+
+        Идентификатор типа события генерируется сервером.
     ErrorCode:
       type: string
       enum:

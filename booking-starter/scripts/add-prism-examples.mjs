@@ -3,6 +3,33 @@ import YAML from "js-yaml";
 
 const OPENAPI_PATH = "tsp-output/@typespec/openapi3/openapi.yaml";
 
+const EVENT_TYPE_EXAMPLES = [
+  {
+    id: "meeting-15",
+    title: "Встреча 15 минут",
+    description: "Короткий тип события для быстрого слота.",
+    durationMinutes: 15,
+  },
+  {
+    id: "meeting-30",
+    title: "Встреча 30 минут",
+    description: "Базовый тип события для бронирования.",
+    durationMinutes: 30,
+  },
+  {
+    id: "consultation-60",
+    title: "Консультация 60 минут",
+    description: "Подробная консультация с клиентом.",
+    durationMinutes: 60,
+  },
+  {
+    id: "project-review-45",
+    title: "Разбор проекта 45 минут",
+    description: "Детальный разбор проекта и рекомендации.",
+    durationMinutes: 45,
+  },
+];
+
 function loadOpenApi() {
   const content = readFileSync(OPENAPI_PATH, "utf8");
   return YAML.load(content);
@@ -17,41 +44,31 @@ function saveOpenApi(doc) {
   writeFileSync(OPENAPI_PATH, content);
 }
 
-function addExamplesToListEndpoint(doc) {
-  const endpoint = doc.paths?.["/public/event-types"];
-  if (!endpoint) throw new Error("Endpoint /public/event-types not found");
+function setEventTypeListExamples(doc, path) {
+  const endpoint = doc.paths?.[path];
+  if (!endpoint) throw new Error(`Endpoint ${path} not found`);
 
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
-  if (!content) throw new Error("200 response content not found");
-
-  if (content.examples) {
-    console.log("List examples already exist, skipping.");
-    return;
-  }
+  if (!content) throw new Error(`200 response content not found for ${path}`);
 
   content.examples = {
     success: {
-      summary: "Два типа событий",
-      value: [
-        {
-          id: "15-min",
-          title: "Встреча 15 минут",
-          description: "Короткий тип события для быстрого слота.",
-          durationMinutes: 15,
-        },
-        {
-          id: "30-min",
-          title: "Встреча 30 минут",
-          description: "Базовый тип события для бронирования.",
-          durationMinutes: 30,
-        },
-      ],
+      summary: "Типы событий",
+      value: EVENT_TYPE_EXAMPLES,
     },
     empty: {
       summary: "Пустой список",
       value: [],
     },
   };
+}
+
+function addExamplesToListEndpoint(doc) {
+  setEventTypeListExamples(doc, "/public/event-types");
+}
+
+function addExamplesToAdminListEndpoint(doc) {
+  setEventTypeListExamples(doc, "/admin/event-types");
 }
 
 function addExamplesToDetailEndpoint(doc) {
@@ -61,20 +78,10 @@ function addExamplesToDetailEndpoint(doc) {
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
   if (!content) throw new Error("200 response content not found");
 
-  if (content.examples) {
-    console.log("Detail examples already exist, skipping.");
-    return;
-  }
-
   content.examples = {
     default: {
       summary: "Тип события 15 минут",
-      value: {
-        id: "15-min",
-        title: "Встреча 15 минут",
-        description: "Короткий тип события для быстрого слота.",
-        durationMinutes: 15,
-      },
+      value: EVENT_TYPE_EXAMPLES[0],
     },
   };
 }
@@ -95,7 +102,7 @@ function generateSlots() {
       slotEnd.setMinutes(slotStart.getMinutes() + 15);
 
       slots.push({
-        eventTypeId: "15-min",
+        eventTypeId: "meeting-15",
         startAt: slotStart.toISOString(),
         endAt: slotEnd.toISOString(),
         durationMinutes: 15,
@@ -112,11 +119,6 @@ function addExamplesToSlotsEndpoint(doc) {
 
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
   if (!content) throw new Error("200 response content not found for slots");
-
-  if (content.examples) {
-    console.log("Slots examples already exist, skipping.");
-    return;
-  }
 
   content.examples = {
     success: {
@@ -290,12 +292,49 @@ function addExamplesToAdminBookingsEndpoint(doc) {
   };
 }
 
+function addExamplesToCreateEventTypeEndpoint(doc) {
+  const endpoint = doc.paths?.["/admin/event-types"];
+  if (!endpoint) throw new Error("Endpoint /admin/event-types not found");
+
+  const requestContent = endpoint.post?.requestBody?.content?.["application/json"];
+  if (!requestContent) throw new Error("POST /admin/event-types request content not found");
+
+  requestContent.examples = {
+    success: {
+      summary: "Создание типа события",
+      value: {
+        title: "Встреча 30 минут",
+        description: "Базовый тип события для бронирования.",
+        durationMinutes: 30,
+      },
+    },
+  };
+
+  const responseContent = endpoint.post?.responses?.["201"]?.content?.["application/json"];
+  if (!responseContent) throw new Error("POST /admin/event-types 201 response content not found");
+
+  responseContent.examples = {
+    success: {
+      summary: "Созданный тип события",
+      value: {
+        id: "created-event-type",
+        title: "Новый тип события",
+        description: "Тип события, созданный через форму.",
+        durationMinutes: 30,
+      },
+    },
+  };
+}
+
 function main() {
   console.log(`Loading ${OPENAPI_PATH}...`);
   const doc = loadOpenApi();
 
-  console.log("Adding list examples...");
+  console.log("Adding public list examples...");
   addExamplesToListEndpoint(doc);
+
+  console.log("Adding admin list examples...");
+  addExamplesToAdminListEndpoint(doc);
 
   console.log("Adding detail examples...");
   addExamplesToDetailEndpoint(doc);
@@ -305,6 +344,9 @@ function main() {
 
   console.log("Adding admin bookings examples...");
   addExamplesToAdminBookingsEndpoint(doc);
+
+  console.log("Adding create event type examples...");
+  addExamplesToCreateEventTypeEndpoint(doc);
 
   console.log(`Saving ${OPENAPI_PATH}...`);
   saveOpenApi(doc);

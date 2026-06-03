@@ -65,16 +65,10 @@ model EventType {
 
 /**
  * Запрос на создание типа события владельцем календаря.
+ *
+ * Идентификатор типа события генерируется сервером.
  */
 model CreateEventTypeRequest {
-  /**
-   * Уникальный идентификатор типа события.
-   *
-   * Задаётся владельцем или админской частью системы.
-   */
-  @minLength(1)
-  id: string;
-
   /**
    * Название типа события.
    */
@@ -448,6 +442,13 @@ namespace Admin {
   /**
    * Возвращает список всех типов событий, созданных владельцем календаря.
    */
+  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[
+    #{ id: "meeting-15", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 },
+    #{ id: "meeting-30", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 },
+    #{ id: "consultation-60", title: "Консультация 60 минут", description: "Подробная консультация с клиентом.", durationMinutes: 60 },
+    #{ id: "project-review-45", title: "Разбор проекта 45 минут", description: "Детальный разбор проекта и рекомендации.", durationMinutes: 45 }
+  ] } }, #{ title: "success" })
+  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[] } }, #{ title: "empty" })
   @get
   @route("/event-types")
   op listEventTypes(): EventTypeListResponse;
@@ -505,7 +506,12 @@ namespace Public {
    *
    * Используется на странице выбора вида брони.
    */
-  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[#{ id: "15-min", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 }, #{ id: "30-min", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 }] } }, #{ title: "success" })
+  @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[
+    #{ id: "meeting-15", title: "Встреча 15 минут", description: "Короткий тип события для быстрого слота.", durationMinutes: 15 },
+    #{ id: "meeting-30", title: "Встреча 30 минут", description: "Базовый тип события для бронирования.", durationMinutes: 30 },
+    #{ id: "consultation-60", title: "Консультация 60 минут", description: "Подробная консультация с клиентом.", durationMinutes: 60 },
+    #{ id: "project-review-45", title: "Разбор проекта 45 минут", description: "Детальный разбор проекта и рекомендации.", durationMinutes: 45 }
+  ] } }, #{ title: "success" })
   @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[] } }, #{ title: "empty" })
   @get
   @route("/event-types")
