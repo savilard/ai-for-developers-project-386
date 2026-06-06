@@ -64,16 +64,16 @@ function setEventTypeListExamples(doc, path) {
 }
 
 function addExamplesToListEndpoint(doc) {
-  setEventTypeListExamples(doc, "/public/event-types");
+  setEventTypeListExamples(doc, "/api/v1/public/event-types/");
 }
 
 function addExamplesToAdminListEndpoint(doc) {
-  setEventTypeListExamples(doc, "/admin/event-types");
+  setEventTypeListExamples(doc, "/api/v1/admin/event-types/");
 }
 
 function addExamplesToDetailEndpoint(doc) {
-  const endpoint = doc.paths?.["/public/event-types/{eventTypeId}"];
-  if (!endpoint) throw new Error("Endpoint /public/event-types/{eventTypeId} not found");
+  const endpoint = doc.paths?.["/api/v1/public/event-types/{eventTypeId}/"];
+  if (!endpoint) throw new Error("Endpoint /api/v1/public/event-types/{eventTypeId}/ not found");
 
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
   if (!content) throw new Error("200 response content not found");
@@ -114,8 +114,8 @@ function generateSlots() {
 }
 
 function addExamplesToSlotsEndpoint(doc) {
-  const endpoint = doc.paths?.["/public/event-types/{eventTypeId}/slots"];
-  if (!endpoint) throw new Error("Endpoint /public/event-types/{eventTypeId}/slots not found");
+  const endpoint = doc.paths?.["/api/v1/public/event-types/{eventTypeId}/slots/"];
+  if (!endpoint) throw new Error("Endpoint /api/v1/public/event-types/{eventTypeId}/slots/ not found");
 
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
   if (!content) throw new Error("200 response content not found for slots");
@@ -258,8 +258,8 @@ function generateAdminBookings() {
 }
 
 function addExamplesToAdminBookingsEndpoint(doc) {
-  const endpoint = doc.paths?.["/admin/bookings/upcoming"];
-  if (!endpoint) throw new Error("Endpoint /admin/bookings/upcoming not found");
+  const endpoint = doc.paths?.["/api/v1/admin/bookings/upcoming/"];
+  if (!endpoint) throw new Error("Endpoint /api/v1/admin/bookings/upcoming/ not found");
 
   const content = endpoint.get?.responses?.["200"]?.content?.["application/json"];
   if (!content) throw new Error("200 response content not found for admin bookings");
@@ -293,8 +293,8 @@ function addExamplesToAdminBookingsEndpoint(doc) {
 }
 
 function addExamplesToCreateEventTypeEndpoint(doc) {
-  const endpoint = doc.paths?.["/admin/event-types"];
-  if (!endpoint) throw new Error("Endpoint /admin/event-types not found");
+  const endpoint = doc.paths?.["/api/v1/admin/event-types/"];
+  if (!endpoint) throw new Error("Endpoint /api/v1/admin/event-types/ not found");
 
   const requestContent = endpoint.post?.requestBody?.content?.["application/json"];
   if (!requestContent) throw new Error("POST /admin/event-types request content not found");

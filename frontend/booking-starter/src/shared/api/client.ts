@@ -1,7 +1,8 @@
 import ky, { HTTPError } from "ky";
 import type { ApiError } from "./types";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4010";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const API_PREFIX = "/api/v1";
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -31,7 +32,7 @@ export async function request<T>(
   }
 ): Promise<T> {
   try {
-    const response = await ky(`${BASE_URL}${path}`, {
+    const response = await ky(`${BASE_URL}${API_PREFIX}${path}`, {
       method: options?.method ?? "GET",
       ...(options?.body ? { json: options.body } : {}),
       ...(options?.searchParams ? { searchParams: options.searchParams } : {}),

@@ -6,7 +6,7 @@ tags:
   - name: Владелец
   - name: Гость
 paths:
-  /admin/bookings/upcoming:
+  /api/v1/admin/bookings/upcoming/:
     get:
       operationId: Admin_listUpcomingBookings
       description: |-
@@ -220,7 +220,7 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       tags:
         - Владелец
-  /admin/event-types:
+  /api/v1/admin/event-types/:
     post:
       operationId: Admin_createEventType
       description: |-
@@ -308,7 +308,7 @@ paths:
                   value: []
       tags:
         - Владелец
-  /admin/owner:
+  /api/v1/admin/owner/:
     get:
       operationId: Admin_getOwner
       description: Возвращает профиль единственного владельца календаря.
@@ -322,7 +322,7 @@ paths:
                 $ref: "#/components/schemas/Owner"
       tags:
         - Владелец
-  /public/bookings:
+  /api/v1/public/bookings/:
     post:
       operationId: Public_createBooking
       description: |-
@@ -368,7 +368,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateBookingRequest"
-  /public/event-types:
+  /api/v1/public/event-types/:
     get:
       operationId: Public_listEventTypes
       description: |-
@@ -410,7 +410,7 @@ paths:
                   value: []
       tags:
         - Гость
-  /public/event-types/{eventTypeId}:
+  /api/v1/public/event-types/{eventTypeId}/:
     get:
       operationId: Public_getEventType
       description: |-
@@ -446,7 +446,7 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       tags:
         - Гость
-  /public/event-types/{eventTypeId}/slots:
+  /api/v1/public/event-types/{eventTypeId}/slots/:
     get:
       operationId: Public_listAvailableSlots
       description: |-

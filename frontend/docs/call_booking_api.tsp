@@ -6,6 +6,7 @@ using Http;
   title: "Call Booking API",
 })
 @server("https://api.example.com", "Production API")
+@route("/api/v1")
 namespace CallBooking;
 
 /**
@@ -425,7 +426,7 @@ namespace Admin {
    * Возвращает профиль единственного владельца календаря.
    */
   @get
-  @route("/owner")
+  @route("/owner/")
   op getOwner(): OwnerResponse;
 
   /**
@@ -434,7 +435,7 @@ namespace Admin {
    * Тип события определяет название, описание и длительность будущих бронирований.
    */
   @post
-  @route("/event-types")
+  @route("/event-types/")
   op createEventType(
     @body request: CreateEventTypeRequest,
   ): EventTypeCreatedResponse | ValidationErrorResponse | ConflictErrorResponse;
@@ -450,7 +451,7 @@ namespace Admin {
   ] } }, #{ title: "success" })
   @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[] } }, #{ title: "empty" })
   @get
-  @route("/event-types")
+  @route("/event-types/")
   op listEventTypes(): EventTypeListResponse;
 
   /**
@@ -459,7 +460,7 @@ namespace Admin {
    * Ожидаемая сортировка: по startAt по возрастанию.
    */
   @get
-  @route("/bookings/upcoming")
+  @route("/bookings/upcoming/")
   op listUpcomingBookings(
     /**
      * Начало периода фильтрации.
@@ -514,7 +515,7 @@ namespace Public {
   ] } }, #{ title: "success" })
   @opExample(#{ returnType: #{ statusCode: 200, eventTypes: #[] } }, #{ title: "empty" })
   @get
-  @route("/event-types")
+  @route("/event-types/")
   op listEventTypes(): EventTypeListResponse;
 
   /**
@@ -523,7 +524,7 @@ namespace Public {
    * Используется перед отображением календаря свободных слотов.
    */
   @get
-  @route("/event-types/{eventTypeId}")
+  @route("/event-types/{eventTypeId}/")
   op getEventType(
     @path eventTypeId: string,
   ): EventTypeResponse | NotFoundErrorResponse;
@@ -538,7 +539,7 @@ namespace Public {
    * - бронирования разных типов событий тоже конфликтуют между собой.
    */
   @get
-  @route("/event-types/{eventTypeId}/slots")
+  @route("/event-types/{eventTypeId}/slots/")
   op listAvailableSlots(
     @path eventTypeId: string,
   ): SlotListResponse | NotFoundErrorResponse;
@@ -554,7 +555,7 @@ namespace Public {
    * - конфликт проверяется по всем типам событий, а не только по выбранному eventTypeId.
    */
   @post
-  @route("/bookings")
+  @route("/bookings/")
   op createBooking(
     @body request: CreateBookingRequest,
   ):
